@@ -1,0 +1,111 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "windows"]
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id               String    @id @default(uuid())
+  email            String    @unique
+  password         String
+  name             String?
+  phone            String?
+  addresses        Address[]
+  role             String    @default("USER") // SUPER_ADMIN, AUDITOR, SUPPLIER, EDITOR, USER
+  hasSeenOnboarding Boolean  @default(false)
+  createdAt        DateTime  @default(now())
+  orders           Order[]
+
+  @@index([role])
+  @@index([createdAt])
+}
+
+model Address {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label     String   // e.g., "Home", "Work"
+  street    String?
+  city      String
+  state     String?
+  zip       String?
+  country   String   @default("Iraq")
+  landmark  String?
+  notes     String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Product {
+  id          String      @id @default(uuid())
+  title       String
+  description String
+  price       Float
+  imageUrl    String
+  stock       Int
+  category    String
+  variants    Json?       // Changed from String? to Json? for better handling
+  createdAt   DateTime    @default(now())
+  orderItems  OrderItem[]
+  discounts   Discount[]
+
+  @@index([category])
+  @@index([price])
+  @@index([createdAt])
+}
+
+model Discount {
+  id          String   @id @default(uuid())
+  code        String?  @unique // Optional promo code
+  percentage  Float?   // e.g., 10 for 10%
+  amount      Float?   // e.g., 5000 for 5000 IQD off
+  startDate   DateTime
+  endDate     DateTime
+  productId   String?
+  product     Product? @relation(fields: [productId], references: [id])
+  createdAt   DateTime @default(now())
+
+  @@index([productId])
+  @@index([endDate])
+}
+
+model Order {
+  id                 String      @id @default(uuid())
+  userId             String
+  user               User        @relation(fields: [userId], references: [id])
+  total              Float
+  status             String      @default("PENDING_PAYMENT") // PENDING_PAYMENT, PAYMENT_VERIFIED, PROCESSING, SHIPPED, DELIVERED, CANCELLED
+  paymentPhoneNumber String?     // Phone number used for WhatsApp verification
+  recipientName      String?     // Name of the person receiving the order
+  shippingAddress    String?     // Full address snapshot at the time of order
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+  items              OrderItem[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id])
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  price     Float
+
+  @@index([orderId])
+  @@index([productId])
+}
+
