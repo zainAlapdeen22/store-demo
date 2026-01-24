@@ -32,11 +32,9 @@ const nextConfig = {
                 ]
             }
         ];
-    },
-    turbopack: {
-        root: 'C:/Users/MR_Zain/Downloads/Telegram Desktop/ecommerce-store'
     }
 };
+
 
 
 
