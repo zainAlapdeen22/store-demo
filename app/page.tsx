@@ -11,10 +11,27 @@ export const dynamic = 'force-dynamic';
 
 export default async function Home() {
     const session = await auth();
+
+    // Optimize: Fetch only necessary products for the grid (e.g., latest 8)
     const products = await prisma.product.findMany({
         orderBy: { createdAt: "desc" },
         include: { discounts: true },
+        take: 8, // Adjust as needed
     });
+
+    // Optimize: Fetch category counts efficiently using groupBy
+    const categoryCounts = await prisma.product.groupBy({
+        by: ['category'],
+        _count: {
+            category: true,
+        },
+    });
+
+    const categoryMap = categoryCounts.reduce((acc, curr) => {
+        acc[curr.category] = curr._count.category;
+        return acc;
+    }, {} as Record<string, number>);
+
 
     return (
         <main className="min-h-screen bg-background">
@@ -35,14 +52,9 @@ export default async function Home() {
                     </div>
 
                     {(() => {
-                        const categoryCount = products.reduce((acc, product) => {
-                            acc[product.category] = (acc[product.category] || 0) + 1;
-                            return acc;
-                        }, {} as Record<string, number>);
-
                         const LAYOUT_ORDER = ['Electronics', 'Accessories', 'Home', 'Men', 'Women', 'Kids'];
 
-                        const categories = Object.entries(categoryCount)
+                        const categories = Object.entries(categoryMap)
                             .sort((a, b) => {
                                 const indexA = LAYOUT_ORDER.indexOf(a[0]);
                                 const indexB = LAYOUT_ORDER.indexOf(b[0]);
@@ -57,6 +69,7 @@ export default async function Home() {
                                 return b[1] - a[1];
                             })
                             .slice(0, 6);
+
 
                         return (
                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
