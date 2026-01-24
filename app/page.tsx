@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { HeroSection } from "@/components/hero-section";
 import { ProductGridHeader } from "@/components/product-grid-header";
@@ -47,7 +48,7 @@ export default async function Home() {
                             <p className="text-muted-foreground mt-1">تصفح المنتجات حسب القسم</p>
                         </div>
                         <Button asChild variant="outline">
-                            <a href="/categories">عرض الكل</a>
+                            <Link href="/categories">عرض الكل</Link>
                         </Button>
                     </div>
 
@@ -78,7 +79,7 @@ export default async function Home() {
                                     const Icon = config.icon;
 
                                     return (
-                                        <a
+                                        <Link
                                             key={category}
                                             href={`/categories/${encodeURIComponent(category)}`}
                                             className="group relative overflow-hidden rounded-xl border bg-card hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
@@ -95,7 +96,7 @@ export default async function Home() {
                                                     </p>
                                                 </div>
                                             </div>
-                                        </a>
+                                        </Link>
                                     );
                                 })}
                             </div>
