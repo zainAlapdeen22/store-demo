@@ -13,16 +13,18 @@ datasource db {
 }
 
 model User {
-  id               String    @id @default(uuid())
-  email            String    @unique
-  password         String
-  name             String?
-  phone            String?
-  addresses        Address[]
-  role             String    @default("USER") // SUPER_ADMIN, AUDITOR, SUPPLIER, EDITOR, USER
-  hasSeenOnboarding Boolean  @default(false)
-  createdAt        DateTime  @default(now())
-  orders           Order[]
+  id                String           @id @default(uuid())
+  email             String           @unique
+  password          String
+  name              String?
+  phone             String?
+  addresses         Address[]
+  role              String           @default("USER") // SUPER_ADMIN, AUDITOR, SUPPLIER, EDITOR, USER
+  hasSeenOnboarding Boolean          @default(false)
+  createdAt         DateTime         @default(now())
+  orders            Order[]
+  twoFactorEnabled  Boolean          @default(false)
+  twoFactorTokens   TwoFactorToken[]
 
   @@index([role])
   @@index([createdAt])
@@ -109,3 +111,30 @@ model OrderItem {
   @@index([productId])
 }
 
+model OTP {
+  id        String   @id @default(uuid())
+  email     String
+  code      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  verified  Boolean  @default(false)
+  attempts  Int      @default(0)
+
+  @@index([email])
+  @@index([expiresAt])
+}
+
+model TwoFactorToken {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  verified  Boolean  @default(false)
+  attempts  Int      @default(0)
+
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+}

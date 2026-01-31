@@ -183,7 +183,23 @@ export const dictionary = {
         orderDetails: "Order Details",
         customerDetails: "Customer Details",
         shippingAddressLabel: "Shipping Address",
-        productsSold: "Products Sold"
+        productsSold: "Products Sold",
+        enterEmail: "Enter your email address",
+        sendCode: "Send Code",
+        sendingCode: "Sending...",
+        enterOTP: "Enter verification code",
+        otpSent: "Code sent to your email",
+        verifyCode: "Verify Code",
+        verifying: "Verifying...",
+        resendCode: "Resend Code",
+        resendIn: "Resend in",
+        invalidOTP: "Invalid or expired code",
+        otpExpired: "Code expired. Request a new one",
+        backToEmail: "Back to Email",
+        codeSentSuccess: "Verification code sent successfully!",
+        checkYourEmail: "Check your email for the code",
+        tooManyAttempts: "Too many attempts. Request a new code",
+        rateLimitExceeded: "Too many requests. Please try again later"
     },
 
     ar: {
@@ -370,7 +386,23 @@ export const dictionary = {
         orderDetails: "تفاصيل الطلب",
         customerDetails: "بيانات الزبون",
         shippingAddressLabel: "عنوان الشحن",
-        productsSold: "المنتجات المباعة"
+        productsSold: "المنتجات المباعة",
+        enterEmail: "أدخل عنوان بريدك الإلكتروني",
+        sendCode: "إرسال الرمز",
+        sendingCode: "جاري الإرسال...",
+        enterOTP: "أدخل رمز التحقق",
+        otpSent: "تم إرسال الرمز إلى بريدك",
+        verifyCode: "تحقق من الرمز",
+        verifying: "جاري التحقق...",
+        resendCode: "إعادة إرسال الرمز",
+        resendIn: "إعادة الإرسال بعد",
+        invalidOTP: "رمز غير صحيح أو منتهي الصلاحية",
+        otpExpired: "انتهت صلاحية الرمز. اطلب رمزاً جديداً",
+        backToEmail: "العودة للبريد الإلكتروني",
+        codeSentSuccess: "تم إرسال رمز التحقق بنجاح!",
+        checkYourEmail: "تحقق من بريدك الإلكتروني للحصول على الرمز",
+        tooManyAttempts: "محاولات كثيرة جداً. اطلب رمزاً جديداً",
+        rateLimitExceeded: "طلبات كثيرة جداً. يرجى المحاولة لاحقاً"
     },
 
 };

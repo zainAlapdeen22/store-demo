@@ -1,4 +1,5 @@
 
+
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
@@ -13,6 +14,7 @@ import { OnboardingTour } from "@/components/onboarding-tour";
 import { ProfileHeader } from "@/components/profile/profile-header";
 import { OrderList } from "@/components/profile/order-list";
 import { ForceSignout } from "@/components/force-signout";
+import { TwoFactorSettings } from "@/components/two-factor-settings";
 
 export const dynamic = 'force-dynamic';
 
@@ -24,7 +26,15 @@ export default async function ProfilePage() {
 
     const user = await prisma.user.findUnique({
         where: { id: session.user.id },
-        include: { addresses: true },
+        select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            hasSeenOnboarding: true,
+            twoFactorEnabled: true,
+            addresses: true,
+        },
     });
 
     if (!user) {
@@ -57,6 +67,12 @@ export default async function ProfilePage() {
                             }} />
                         </CardContent>
                     </Card>
+
+                    <TwoFactorSettings
+                        userId={user.id}
+                        initialEnabled={user.twoFactorEnabled || false}
+                        userEmail={user.email}
+                    />
                 </div>
 
                 <div className="md:col-span-2 space-y-8">
