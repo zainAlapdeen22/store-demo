@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { CartSheet } from "@/components/cart-sheet";
 import { useCart } from "@/components/cart-provider";
 import { useI18n } from "@/components/i18n-provider";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 import { useSession } from "next-auth/react";
 
@@ -27,20 +28,20 @@ export function Navbar() {
         setMounted(true);
     }, []);
 
-    useEffect(() => {
-        update();
-    }, [pathname]);
+    // Session update logic can be simplified or handled more efficiently
+
 
     const toggleLanguage = () => {
         setLanguage(language === "en" ? "ar" : "en");
     };
+
 
     return (
         <>
             <nav className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 print:hidden">
                 <div className="container flex h-16 items-center justify-between">
                     <Link href="/" className="me-6 flex items-center space-x-2 rtl:space-x-reverse">
-                        <span className="text-xl font-bold">{dict.store}</span>
+                        <span className="text-xl font-bold">{(dict.store as string)}</span>
                     </Link>
 
                     <div className="hidden md:flex flex-1 mx-6">
@@ -49,7 +50,8 @@ export function Navbar() {
 
                     {/* Desktop Menu */}
                     <div className="hidden md:flex items-center space-x-6 rtl:space-x-reverse">
-                        <Link href="/categories" className="text-sm font-medium hover:text-primary transition-colors">{dict.categories || "الأقسام"}</Link>
+                        <Link href="/categories" className="text-sm font-medium hover:text-primary transition-colors">{(dict.categories as string)}</Link>
+
 
                         <div className="h-4 w-px bg-border mx-2" />
 
@@ -59,9 +61,10 @@ export function Navbar() {
 
                         {(session?.user as any)?.role === "SUPER_ADMIN" && (
                             <Link href="/admin" className="text-sm font-medium hover:text-primary transition-colors">
-                                {dict.admin}
+                                {(dict.admin as string)}
                             </Link>
                         )}
+                        <ThemeToggle />
                         <Button variant="ghost" size="icon" className="relative" onClick={() => setIsCartOpen(true)}>
                             <ShoppingBag className="h-5 w-5" />
                             {mounted && items.length > 0 && (
@@ -80,7 +83,7 @@ export function Navbar() {
                         ) : (
                             <Link href="/login">
                                 <Button variant="ghost" size="sm">
-                                    {dict.signIn}
+                                    {(dict.signIn as string)}
                                 </Button>
                             </Link>
                         )}
@@ -91,6 +94,7 @@ export function Navbar() {
                         <Button variant="ghost" size="sm" onClick={toggleLanguage} className="font-bold">
                             {language === "en" ? "عربي" : "En"}
                         </Button>
+                        <ThemeToggle />
                         <Button variant="ghost" size="icon" className="relative" onClick={() => setIsCartOpen(true)}>
                             <ShoppingBag className="h-5 w-5" />
                             {mounted && items.length > 0 && (
@@ -122,17 +126,18 @@ export function Navbar() {
                                     <Search />
                                 </div>
                                 <Link href="/products" className="text-sm font-medium p-2 hover:bg-muted rounded-md" onClick={() => setIsOpen(false)}>
-                                    {dict.shop}
+                                    {(dict.shop as string)}
                                 </Link>
                                 {(session?.user as any)?.role === "SUPER_ADMIN" && (
                                     <Link href="/admin" className="text-sm font-medium p-2 hover:bg-muted rounded-md" onClick={() => setIsOpen(false)}>
-                                        {dict.admin}
+                                        {(dict.admin as string)}
                                     </Link>
                                 )}
                                 {session?.user ? (
                                     <Link href="/profile" className="text-sm font-medium p-2 hover:bg-muted rounded-md" onClick={() => setIsOpen(false)}>
-                                        {dict.myProfile || "My Profile"}
+                                        {dict.myProfile}
                                     </Link>
+
                                 ) : (
                                     <Link href="/login" className="text-sm font-medium p-2 hover:bg-muted rounded-md" onClick={() => setIsOpen(false)}>
                                         {dict.signIn}

@@ -61,14 +61,8 @@ export function useI18n() {
         throw new Error("useI18n must be used within an I18nProvider");
     }
 
-    if (!mounted) {
-        return {
-            ...context,
-            language: "en",
-            dict: dictionary["en"],
-            dir: "ltr",
-        };
-    }
-
+    // To prevent hydration mismatch but still allow SSR for the default language (English)
+    // we return the context immediately. The Provider handles the initial localStorage check.
     return context;
 }
+

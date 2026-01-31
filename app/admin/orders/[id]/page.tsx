@@ -1,12 +1,16 @@
 import { prisma } from "@/lib/prisma";
 import { formatCurrency } from "@/lib/utils";
 import { OrderStatusTimeline } from "@/components/order-status-timeline";
-import { OrderStatusForm } from "./order-status-form";
+import { OrderStatusForm } from "@/components/admin/order-status-form";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, FileText } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+
+export const dynamic = 'force-dynamic';
+
 
 export default async function OrderPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;

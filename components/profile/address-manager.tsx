@@ -46,8 +46,9 @@ const governorates = [
 export function AddressManager({ addresses, onSelect, selectedId, onAddressAdded }: AddressManagerProps) {
     const [isAdding, setIsAdding] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
-    const { dict } = useI18n();
+    const { dict, language } = useI18n();
     const { showAlert, showConfirm } = useAlert();
+
 
     async function onAdd(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
@@ -60,17 +61,18 @@ export function AddressManager({ addresses, onSelect, selectedId, onAddressAdded
         if (result.error) {
             console.error(result.error);
             showAlert({
-                title: "Error",
+                title: dict.error,
                 message: typeof result.error === 'string' ? result.error : JSON.stringify(result.error),
                 type: "error"
             });
         } else {
             setIsOpen(false);
             showAlert({
-                title: "Success",
-                message: "Address added successfully",
+                title: dict.success,
+                message: language === "ar" ? "تمت إضافة العنوان بنجاح" : "Address added successfully",
                 type: "success"
             });
+
             // Call the callback with the new address if provided
             if (result.address && onAddressAdded) {
                 onAddressAdded(result.address);
@@ -80,15 +82,15 @@ export function AddressManager({ addresses, onSelect, selectedId, onAddressAdded
 
     async function onDelete(id: string) {
         showConfirm({
-            title: "Delete Address",
-            message: "Are you sure you want to delete this address?",
+            title: dict.deleteAddressTitle,
+            message: dict.deleteAddressConfirm,
             type: "warning",
-            confirmText: "Delete",
+            confirmText: dict.delete,
             onConfirm: async () => {
                 await deleteAddress(id);
                 showAlert({
-                    title: "Success",
-                    message: "Address deleted successfully",
+                    title: dict.success,
+                    message: language === "ar" ? "تم حذف العنوان بنجاح" : "Address deleted successfully",
                     type: "success"
                 });
             }
@@ -111,8 +113,8 @@ export function AddressManager({ addresses, onSelect, selectedId, onAddressAdded
                         </DialogHeader>
                         <form onSubmit={onAdd} className="space-y-4 mt-4">
                             <div className="space-y-2">
-                                <Label htmlFor="label">{dict.address} Label</Label>
-                                <Input id="label" name="label" required placeholder="Home, Work..." />
+                                <Label htmlFor="label">{dict.address} {language === "ar" ? "وصف" : "Label"}</Label>
+                                <Input id="label" name="label" required placeholder={language === "ar" ? "المنزل، العمل..." : "Home, Work..."} />
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
@@ -189,7 +191,7 @@ export function AddressManager({ addresses, onSelect, selectedId, onAddressAdded
                                 <div>
                                     <p className="font-medium">{address.label}</p>
                                     <p className="text-sm text-muted-foreground">
-                                        {dict[address.state as keyof typeof dict] || address.state}, {address.city}
+                                        {(dict[address.state as keyof typeof dict] as string) || address.state}, {address.city}
                                     </p>
                                     {address.landmark && (
                                         <p className="text-sm text-muted-foreground">{address.landmark}</p>

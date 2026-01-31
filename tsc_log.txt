@@ -1,0 +1,32 @@
+﻿.next/dev/types/validator.ts(5,50): error TS2305: Module '"./routes.js"' has no exported member 'AppRouteHandlerRoutes'.
+.next/dev/types/validator.ts(40,59): error TS2536: Type 'Route' cannot be used to index type 'ParamMap'.
+.next/dev/types/validator.ts(41,60): error TS2536: Type 'Route' cannot be used to index type 'ParamMap'.
+.next/dev/types/validator.ts(42,59): error TS2536: Type 'Route' cannot be used to index type 'ParamMap'.
+.next/dev/types/validator.ts(43,61): error TS2536: Type 'Route' cannot be used to index type 'ParamMap'.
+.next/dev/types/validator.ts(44,62): error TS2536: Type 'Route' cannot be used to index type 'ParamMap'.
+.next/dev/types/validator.ts(45,60): error TS2536: Type 'Route' cannot be used to index type 'ParamMap'.
+.next/dev/types/validator.ts(46,63): error TS2536: Type 'Route' cannot be used to index type 'ParamMap'.
+.next/dev/types/validator.ts(52,52): error TS2344: Type '"/admin/analytics"' does not satisfy the constraint 'never'.
+.next/dev/types/validator.ts(61,52): error TS2344: Type '"/admin/discounts"' does not satisfy the constraint 'never'.
+.next/dev/types/validator.ts(70,52): error TS2344: Type '"/admin/orders/[id]/invoice"' does not satisfy the constraint 'never'.
+.next/dev/types/validator.ts(79,52): error TS2344: Type '"/admin/orders/[id]"' does not satisfy the constraint 'never'.
+.next/dev/types/validator.ts(88,52): error TS2344: Type '"/admin/orders"' does not satisfy the constraint 'never'.
+.next/dev/types/validator.ts(97,52): error TS2344: Type '"/admin"' does not satisfy the constraint 'never'.
+.next/dev/types/validator.ts(106,52): error TS2344: Type '"/admin/products/[id]"' does not satisfy the constraint 'never'.
+.next/dev/types/validator.ts(115,52): error TS2344: Type '"/admin/products/new"' does not satisfy the constraint 'never'.
+.next/dev/types/validator.ts(124,52): error TS2344: Type '"/admin/products"' does not satisfy the constraint 'never'.
+.next/dev/types/validator.ts(133,52): error TS2344: Type '"/admin/super"' does not satisfy the constraint 'never'.
+.next/dev/types/validator.ts(142,52): error TS2344: Type '"/admin/users"' does not satisfy the constraint 'never'.
+.next/dev/types/validator.ts(151,52): error TS2344: Type '"/categories/[category]"' does not satisfy the constraint 'never'.
+.next/dev/types/validator.ts(160,52): error TS2344: Type '"/categories"' does not satisfy the constraint 'never'.
+.next/dev/types/validator.ts(169,52): error TS2344: Type '"/checkout"' does not satisfy the constraint 'never'.
+.next/dev/types/validator.ts(178,52): error TS2344: Type '"/login"' does not satisfy the constraint 'never'.
+.next/dev/types/validator.ts(187,52): error TS2344: Type '"/orders"' does not satisfy the constraint 'never'.
+.next/dev/types/validator.ts(196,52): error TS2344: Type '"/"' does not satisfy the constraint 'never'.
+.next/dev/types/validator.ts(205,52): error TS2344: Type '"/products/[id]"' does not satisfy the constraint 'never'.
+.next/dev/types/validator.ts(214,52): error TS2344: Type '"/products"' does not satisfy the constraint 'never'.
+.next/dev/types/validator.ts(223,52): error TS2344: Type '"/profile"' does not satisfy the constraint 'never'.
+.next/dev/types/validator.ts(232,52): error TS2344: Type '"/register"' does not satisfy the constraint 'never'.
+.next/dev/types/validator.ts(241,52): error TS2344: Type '"/search"' does not satisfy the constraint 'never'.
+.next/dev/types/validator.ts(290,51): error TS2344: Type '"/admin"' does not satisfy the constraint 'never'.
+.next/dev/types/validator.ts(299,51): error TS2344: Type '"/"' does not satisfy the constraint 'never'.

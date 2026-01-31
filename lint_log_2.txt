@@ -1,0 +1,32 @@
+﻿
+> ecommerce-store@0.1.0 lint
+> next lint
+
+node.exe : Invalid 
+project directory 
+provided, no such 
+directory: C:\Users\M
+R_Zain\Downloads\Tele
+gram Desktop\ecommerc
+e-store\lint
+At line:1 char:1
++ & "D:\Program Files
+\nodejs/node.exe" 
+"D:\Program 
+Files\nodejs/node_mo 
+...
++ ~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: (Invalid   
+  project...erce-    
+store\lint:Strin    
+g) [], RemoteExc    
+eption
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 

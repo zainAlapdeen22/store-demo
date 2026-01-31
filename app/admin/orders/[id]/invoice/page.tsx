@@ -25,7 +25,7 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
     const statusArabic = statusMap[order.status] || order.status;
 
     return (
-        <div className="min-h-screen bg-white text-slate-900 font-sans p-8 max-w-[1000px] mx-auto print:p-0 print:max-w-none" dir="rtl">
+        <div className="bg-white text-slate-900 font-sans p-8 max-w-[1000px] mx-auto print:p-0 print:max-w-none" dir="rtl">
             {/* Header */}
             <header className="flex justify-between items-start mb-8">
                 <div className="flex gap-4 items-center">
@@ -139,23 +139,25 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
                             </tr>
                         ))}
                         {/* Empty rows to fill space if needed, matching the aesthetic of the image with striped empty rows */}
-                        {[1, 2, 3].map((_, i) => (
+                        {/* Reduced empty rows to save space and prevent page splitting */}
+                        {[1].map((_, i) => (
                             <tr key={`empty-${i}`} className={(order.items.length + i) % 2 === 0 ? "bg-white" : "bg-gray-100 print:bg-gray-100 print:print-color-adjust-exact"}>
-                                <td className="py-4 border-b border-slate-200">&nbsp;</td>
-                                <td className="py-4 border-b border-slate-200">&nbsp;</td>
-                                <td className="py-4 border-b border-slate-200">&nbsp;</td>
-                                <td className="py-4 border-b border-slate-200">&nbsp;</td>
-                                <td className="py-4 border-b border-slate-200">&nbsp;</td>
-                                <td className="py-4 border-b border-slate-200">&nbsp;</td>
-                                <td className="py-4 border-b border-slate-200">&nbsp;</td>
+                                <td className="py-2 border-b border-slate-200">&nbsp;</td>
+                                <td className="py-2 border-b border-slate-200">&nbsp;</td>
+                                <td className="py-2 border-b border-slate-200">&nbsp;</td>
+                                <td className="py-2 border-b border-slate-200">&nbsp;</td>
+                                <td className="py-2 border-b border-slate-200">&nbsp;</td>
+                                <td className="py-2 border-b border-slate-200">&nbsp;</td>
+                                <td className="py-2 border-b border-slate-200">&nbsp;</td>
                             </tr>
                         ))}
+
                     </tbody>
                 </table>
             </div>
 
-            {/* Footer Totals */}
-            <div className="flex justify-end mt-4">
+            {/* Footer Totals - Prevent splitting across pages */}
+            <div className="flex justify-end mt-4 print:break-inside-avoid">
                 <div className="w-1/2">
                     <div className="flex justify-between items-center py-2 px-4">
                         <span className="font-bold text-slate-800">المجموع الجزئي</span>

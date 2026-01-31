@@ -7,13 +7,19 @@ import { useState, useEffect } from "react";
 import { createOrder } from "@/app/actions";
 import { Loader2, CreditCard, Camera, MessageCircle, Phone, Globe, Copy } from "lucide-react";
 import { useCart } from "@/components/cart-provider";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, isValidIraqiPhone } from "@/lib/utils";
+
 import { useAlert } from "@/components/alert-provider";
 import { getAddresses } from "@/actions/profile";
 import { AddressManager } from "@/components/profile/address-manager";
 import { Address } from "@prisma/client";
+import { motion } from "framer-motion";
+
 
 export const dynamic = 'force-dynamic';
+
+import { useI18n } from "@/components/i18n-provider";
+import { useRouter } from "next/navigation";
 
 export default function CheckoutPage() {
     const { items, total, clearCart } = useCart();
@@ -24,16 +30,16 @@ export default function CheckoutPage() {
     const [addresses, setAddresses] = useState<Address[]>([]);
     const [selectedAddressId, setSelectedAddressId] = useState<string>("");
     const { showAlert } = useAlert();
+    const { dict, language } = useI18n();
+    const router = useRouter();
 
     useEffect(() => {
         getAddresses().then(setAddresses);
     }, []);
 
     const handleAddressAdded = async (newAddress: Address) => {
-        // Refresh addresses list
         const updatedAddresses = await getAddresses();
         setAddresses(updatedAddresses);
-        // Auto-select the newly added address
         setSelectedAddressId(newAddress.id);
     };
 
@@ -43,15 +49,23 @@ export default function CheckoutPage() {
         const selectedAddress = addresses.find(a => a.id === selectedAddressId);
         if (!selectedAddress) {
             showAlert({
-                title: "Error",
-                message: "Please select a shipping address.",
+                title: dict.error,
+                message: dict.pleaseSelectAddress,
+                type: "error"
+            });
+            return;
+        }
+
+        if (!isValidIraqiPhone(paymentPhone)) {
+            showAlert({
+                title: dict.error,
+                message: dict.invalidPhone,
                 type: "error"
             });
             return;
         }
 
         setLoading(true);
-
         const fullAddress = `${selectedAddress.label}: ${selectedAddress.state}, ${selectedAddress.city}, ${selectedAddress.landmark || ''} ${selectedAddress.notes ? `(${selectedAddress.notes})` : ''}`;
 
         try {
@@ -61,12 +75,13 @@ export default function CheckoutPage() {
                 fullAddress,
                 recipientName
             );
+            // No alert on success, just transition to success view
             setSuccess(true);
             clearCart();
         } catch (error) {
             showAlert({
-                title: "Error",
-                message: "Order failed. Please try again.",
+                title: dict.error,
+                message: dict.orderFailedTryAgain,
                 type: "error"
             });
             console.error(error);
@@ -77,15 +92,21 @@ export default function CheckoutPage() {
 
     if (success) {
         return (
-            <div className="container py-20 flex flex-col items-center justify-center text-center space-y-4">
-                <div className="h-20 w-20 rounded-full bg-green-100 flex items-center justify-center">
-                    <span className="text-4xl">🎉</span>
+            <div className="container py-32 flex flex-col items-center justify-center text-center space-y-6 max-w-2xl mx-auto px-6">
+                <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="h-24 w-24 rounded-full bg-green-500/10 flex items-center justify-center border border-green-500/20"
+                >
+                    <span className="text-5xl">🎉</span>
+                </motion.div>
+                <div className="space-y-2">
+                    <h1 className="text-4xl font-black tracking-tight">{dict.orderSuccess}</h1>
+                    <p className="text-xl text-muted-foreground">{dict.orderPendingDesc}</p>
                 </div>
-                <h1 className="text-2xl font-bold">Order Placed Successfully!</h1>
-                <p className="text-muted-foreground">Your order is pending payment verification.</p>
-                <p className="text-sm">We will notify you once we verify your transfer.</p>
-                <Button asChild className="mt-4">
-                    <a href="/orders">View My Orders</a>
+                <p className="text-muted-foreground/80 max-w-sm">{dict.orderNotifyDesc}</p>
+                <Button size="lg" className="rounded-full px-10 h-14 text-lg font-bold shadow-xl shadow-primary/20" onClick={() => router.push("/orders")}>
+                    {dict.viewOrders}
                 </Button>
             </div>
         )
@@ -93,171 +114,162 @@ export default function CheckoutPage() {
 
     if (items.length === 0) {
         return (
-            <div className="container py-20 text-center">
-                <h1 className="text-2xl font-bold mb-4">Your cart is empty</h1>
-                <Button asChild><a href="/">Go Shopping</a></Button>
+            <div className="container py-32 text-center space-y-6">
+                <h1 className="text-3xl font-black tracking-tight">{dict.emptyCart}</h1>
+                <Button size="lg" variant="outline" className="rounded-full px-10 h-14 font-bold" onClick={() => router.push("/")}>
+                    {dict.goShopping}
+                </Button>
             </div>
         );
     }
 
     return (
-        <div className="container py-10 max-w-4xl grid md:grid-cols-2 gap-8">
-            <div className="space-y-6">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Order Summary</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        {items.map((item, i) => (
-                            <div key={i} className="flex justify-between text-sm">
-                                <span>{item.title} x {item.quantity}</span>
-                                <span>{formatCurrency(item.price * item.quantity)}</span>
-                            </div>
-                        ))}
-                        <div className="border-t pt-4 flex justify-between font-bold text-lg">
-                            <span>Total</span>
-                            <span>{formatCurrency(total)}</span>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card className="bg-blue-50 border-blue-200">
-                    <CardHeader>
-                        <CardTitle className="text-blue-800 flex items-center gap-2">
-                            <CreditCard className="h-6 w-6" />
-                            تعليمات الدفع
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                        <div className="flex flex-col items-center p-6 bg-white rounded-lg border shadow-sm">
-                            {/* Visual Card Representation */}
-                            <div className="w-full max-w-sm aspect-[1.586/1] rounded-xl bg-gradient-to-r from-slate-900 to-slate-800 p-6 text-white shadow-lg relative overflow-hidden mb-4">
-                                <div className="absolute top-0 right-0 p-4 opacity-20">
-                                    <Globe className="h-24 w-24" />
-                                </div>
-                                <div className="flex flex-col justify-between h-full relative z-10">
-                                    <div className="flex justify-between items-start">
-                                        <div className="flex gap-2">
-                                            <div className="h-8 w-12 bg-white/20 rounded"></div>
-                                        </div>
-                                        <span className="font-mono text-lg tracking-wider">Credit Card</span>
+        <div className="container py-20 px-6 max-w-6xl mx-auto">
+            <div className="grid lg:grid-cols-[1fr_400px] gap-12 items-start">
+                <div className="space-y-8">
+                    <Card className="border-none shadow-2xl shadow-primary/5 bg-card overflow-hidden">
+                        <CardHeader className="bg-primary/5 p-8 border-b border-primary/5">
+                            <CardTitle className="text-2xl font-black tracking-tight flex items-center gap-3">
+                                <CreditCard className="h-6 w-6 text-primary" />
+                                {dict.paymentInstructions}
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-8 space-y-8">
+                            <div className="flex flex-col items-center">
+                                <motion.div
+                                    whileHover={{ scale: 1.02 }}
+                                    className="w-full max-w-md aspect-[1.586/1] rounded-3xl bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 p-8 text-white shadow-2xl relative overflow-hidden ring-1 ring-white/10"
+                                >
+                                    <div className="absolute top-0 right-0 p-6 opacity-5">
+                                        <Globe className="h-32 w-32" />
                                     </div>
-                                    <div className="space-y-4">
-                                        <div className="flex gap-4 items-center">
-                                            <span className="font-mono text-xl sm:text-2xl tracking-widest text-shadow">5555 4444 3333 2222</span>
-                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-white hover:bg-white/20" onClick={() => {
-                                                navigator.clipboard.writeText("5555444433332222");
-                                            }}>
-                                                <Copy className="h-4 w-4" />
-                                            </Button>
+                                    <div className="flex flex-col justify-between h-full relative z-10">
+                                        <div className="flex justify-between items-start">
+                                            <div className="h-10 w-14 bg-gradient-to-br from-amber-400 to-amber-600 rounded-lg shadow-inner"></div>
+                                            <span className="font-mono text-sm tracking-widest opacity-50 uppercase">Premium Select</span>
                                         </div>
-                                        <div className="flex justify-between items-end">
-                                            <div>
-                                                <p className="text-[10px] text-white/70 uppercase mb-1">Holder Name</p>
-                                                <p className="font-medium tracking-wide">STORE OWNER</p>
+                                        <div className="space-y-6">
+                                            <div className="flex items-center justify-between">
+                                                <span className="font-mono text-2xl sm:text-3xl tracking-[0.2em] font-black text-shadow-lg">
+                                                    5555 4444 3333 2222
+                                                </span>
+                                                <Button variant="ghost" size="icon" className="h-10 w-10 text-white hover:bg-white/10 rounded-full" onClick={() => {
+                                                    navigator.clipboard.writeText("5555444433332222");
+                                                    showAlert({ title: dict.success, message: language === "ar" ? "تم نسخ الرقم" : "Number copied", type: "success" });
+                                                }}>
+                                                    <Copy className="h-4 w-4" />
+                                                </Button>
                                             </div>
-                                            <div className="flex flex-col items-end">
-                                                <p className="text-[10px] text-white/70 uppercase mb-1">Expires</p>
-                                                <p className="font-mono">12/30</p>
+                                            <div className="flex justify-between items-end">
+                                                <div>
+                                                    <p className="text-[10px] text-white/40 uppercase font-black mb-1">{dict.cardHolder}</p>
+                                                    <p className="font-bold tracking-widest text-lg">ONYX STORE OWNER</p>
+                                                </div>
+                                                <div className="text-end">
+                                                    <p className="text-[10px] text-white/40 uppercase font-black mb-1">{dict.expires}</p>
+                                                    <p className="font-mono text-lg font-bold">12/30</p>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="space-y-4">
-                            <div className="flex items-start gap-4 p-3 rounded-lg hover:bg-white/50 transition-colors">
-                                <div className="mt-1 bg-blue-100 p-2 rounded-full text-blue-600">
-                                    <CreditCard className="h-5 w-5" />
-                                </div>
-                                <div>
-                                    <h4 className="font-bold text-blue-900">1. تحويل المبلغ</h4>
-                                    <p className="text-sm text-blue-800">قم بتحويل المبلغ الإجمالي إلى البطاقة الظاهرة في الأعلى.</p>
-                                </div>
+                                </motion.div>
                             </div>
 
-                            <div className="flex items-start gap-4 p-3 rounded-lg hover:bg-white/50 transition-colors">
-                                <div className="mt-1 bg-blue-100 p-2 rounded-full text-blue-600">
-                                    <Camera className="h-5 w-5" />
-                                </div>
-                                <div>
-                                    <h4 className="font-bold text-blue-900">2. تصوير الإشعار</h4>
-                                    <p className="text-sm text-blue-800">التقط صورة لإشعار التحويل من تطبيق البنك الخاص بك.</p>
-                                </div>
+                            <div className="grid gap-4">
+                                {[
+                                    { step: dict.payStep1, desc: dict.payStep1Desc, icon: CreditCard },
+                                    { step: dict.payStep2, desc: dict.payStep2Desc, icon: Camera },
+                                    { step: dict.payStep3, desc: dict.payStep3Desc, icon: MessageCircle },
+                                    { step: dict.payStep4, desc: dict.payStep4Desc, icon: Phone },
+                                ].map((item, idx) => (
+                                    <div key={idx} className="flex items-start gap-4 p-5 rounded-2xl hover:bg-primary/5 transition-all group">
+                                        <div className="bg-primary/10 p-3 rounded-2xl text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
+                                            <item.icon className="h-6 w-6" />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-black text-lg">{item.step}</h4>
+                                            <p className="text-muted-foreground leading-relaxed">{item.desc}</p>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
+                        </CardContent>
+                    </Card>
+                </div>
 
-                            <div className="flex items-start gap-4 p-3 rounded-lg hover:bg-white/50 transition-colors">
-                                <div className="mt-1 bg-blue-100 p-2 rounded-full text-blue-600">
-                                    <MessageCircle className="h-5 w-5" />
+                <div className="space-y-8 sticky top-24">
+                    <Card className="border-none shadow-2xl shadow-primary/5 border-t-4 border-t-primary rounded-3xl overflow-hidden">
+                        <CardHeader className="p-8 pb-4">
+                            <CardTitle className="text-xl font-black">{dict.orderSummary}</CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-8 pt-0 space-y-6">
+                            <div className="space-y-4">
+                                {items.map((item, i) => (
+                                    <div key={i} className="flex justify-between text-base">
+                                        <span className="text-muted-foreground">{item.title} <span className="font-bold text-primary/80">x{item.quantity}</span></span>
+                                        <span className="font-bold">{formatCurrency(item.price * item.quantity)}</span>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="pt-6 border-t border-dashed border-border flex justify-between items-end">
+                                <span className="text-muted-foreground font-medium">{dict.total}</span>
+                                <span className="font-black text-4xl tracking-tighter text-primary">
+                                    {formatCurrency(total)}
+                                </span>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="border-none shadow-2xl shadow-primary/5 rounded-3xl overflow-hidden">
+                        <CardHeader className="p-8 pb-4">
+                            <CardTitle className="text-xl font-black font-primary">
+                                {language === "ar" ? "تفاصيل إتمام الطلب" : "Finalize Order"}
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-8 pt-0">
+                            <form onSubmit={handlePayment} className="space-y-6">
+                                <div className="space-y-3">
+                                    <label className="text-sm font-black uppercase tracking-widest text-primary/60">{dict.recipientName}</label>
+                                    <Input
+                                        required
+                                        className="h-14 rounded-2xl bg-muted/30 border-none focus-visible:ring-2 focus-visible:ring-primary shadow-inner"
+                                        placeholder={dict.recipientPlaceholder}
+                                        value={recipientName}
+                                        onChange={e => setRecipientName(e.target.value)}
+                                    />
                                 </div>
-                                <div>
-                                    <h4 className="font-bold text-blue-900">3. إرسال إلى واتساب</h4>
-                                    <p className="text-sm text-blue-800">
-                                        أرسل الصورة إلى الرقم <span className="font-bold dir-ltr inline-block">070000000</span>
-                                    </p>
+
+                                <div className="space-y-3">
+                                    <label className="text-sm font-black uppercase tracking-widest text-primary/60">{dict.shippingAddress}</label>
+                                    <AddressManager
+                                        addresses={addresses}
+                                        onSelect={(addr) => setSelectedAddressId(addr.id)}
+                                        selectedId={selectedAddressId}
+                                        onAddressAdded={handleAddressAdded}
+                                    />
                                 </div>
-                            </div>
 
-                            <div className="flex items-start gap-4 p-3 rounded-lg hover:bg-white/50 transition-colors">
-                                <div className="mt-1 bg-blue-100 p-2 rounded-full text-blue-600">
-                                    <Phone className="h-5 w-5" />
+                                <div className="space-y-3">
+                                    <label className="text-sm font-black uppercase tracking-widest text-primary/60">{dict.paymentPhone}</label>
+                                    <Input
+                                        required
+                                        className="h-14 rounded-2xl bg-muted/30 border-none focus-visible:ring-2 focus-visible:ring-primary shadow-inner"
+                                        placeholder={dict.paymentPhonePlaceholder}
+                                        value={paymentPhone}
+                                        onChange={e => setPaymentPhone(e.target.value)}
+                                    />
+                                    <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">{dict.paymentPhoneDesc}</p>
                                 </div>
-                                <div>
-                                    <h4 className="font-bold text-blue-900">4. تأكيد الطلب</h4>
-                                    <p className="text-sm text-blue-800">أدخل رقم هاتفك في الأسفل لتأكيد الطلب.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
 
-            <div>
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Checkout Details</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <form onSubmit={handlePayment} className="space-y-4">
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Recipient Name</label>
-                                <Input
-                                    required
-                                    placeholder="Who is receiving this order?"
-                                    value={recipientName}
-                                    onChange={e => setRecipientName(e.target.value)}
-                                />
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Shipping Address</label>
-                                <AddressManager
-                                    addresses={addresses}
-                                    onSelect={(addr) => setSelectedAddressId(addr.id)}
-                                    selectedId={selectedAddressId}
-                                    onAddressAdded={handleAddressAdded}
-                                />
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Sender Phone Number</label>
-                                <Input
-                                    required
-                                    placeholder="The number you used for WhatsApp"
-                                    value={paymentPhone}
-                                    onChange={e => setPaymentPhone(e.target.value)}
-                                />
-                                <p className="text-xs text-muted-foreground">We use this to verify your payment.</p>
-                            </div>
-
-                            <Button className="w-full" size="lg" disabled={loading}>
-                                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Complete Order"}
-                            </Button>
-                        </form>
-                    </CardContent>
-                </Card>
+                                <Button className="w-full h-16 rounded-2xl text-xl font-black shadow-2xl shadow-primary/20 transition-all hover:-translate-y-1" size="lg" disabled={loading}>
+                                    {loading ? <Loader2 className="mr-2 h-6 w-6 animate-spin" /> : dict.completeOrder}
+                                </Button>
+                            </form>
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
         </div>
     );
 }
+

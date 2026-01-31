@@ -1,58 +1,60 @@
 import { Share2, Shirt, Baby, Watch, Laptop, Home, ShoppingBag, Grid } from "lucide-react";
 
 export interface CategoryConfig {
-    ar: string;
-    description: string;
+    titleKey: string;
+    descKey: string;
     icon: any;
     gradient: string;
 }
 
 export const categoryConfig: Record<string, CategoryConfig> = {
     "Men": {
-        ar: "رجالي",
-        description: "أحدث صيحات الموضة للرجال",
+        titleKey: "men",
+        descKey: "men",
         icon: Shirt,
-        gradient: "from-blue-500 to-cyan-400"
+        gradient: "from-blue-600 to-indigo-500"
     },
     "Women": {
-        ar: "نسائي",
-        description: "تألقي بأجمل الأزياء النسائية",
+        titleKey: "women",
+        descKey: "women",
         icon: ShoppingBag,
-        gradient: "from-pink-500 to-rose-400"
+        gradient: "from-rose-500 to-pink-500"
     },
     "Kids": {
-        ar: "أطفال",
-        description: "ملابس مريحة وأنيقة للأطفال",
+        titleKey: "kids",
+        descKey: "kids",
         icon: Baby,
-        gradient: "from-yellow-400 to-orange-400"
+        gradient: "from-amber-400 to-orange-500"
     },
     "Accessories": {
-        ar: "إكسسوارات",
-        description: "لمسات نهائية تكتمل بها أناقتك",
+        titleKey: "accessories",
+        descKey: "accessories",
         icon: Watch,
-        gradient: "from-purple-500 to-indigo-400"
+        gradient: "from-violet-600 to-purple-500"
     },
     "Electronics": {
-        ar: "إلكترونيات",
-        description: "أحدث التقنيات والأجهزة",
+        titleKey: "electronics",
+        descKey: "electronics",
         icon: Laptop,
-        gradient: "from-slate-700 to-slate-500"
+        gradient: "from-slate-800 to-slate-600"
     },
     "Home": {
-        ar: "المنزل",
-        description: "كل ما يحتاجه منزلك العصري",
+        titleKey: "home",
+        descKey: "home",
         icon: Home,
-        gradient: "from-emerald-500 to-teal-400"
+        gradient: "from-emerald-600 to-teal-500"
     },
     // Fallback for unknown categories
     "default": {
-        ar: "منتجات متنوعة",
-        description: "تصفح مجموعتنا المميزة",
+        titleKey: "default",
+        descKey: "default",
         icon: Grid,
-        gradient: "from-gray-500 to-gray-400"
+        gradient: "from-zinc-600 to-zinc-400"
     }
 };
 
 export function getCategoryConfig(name: string): CategoryConfig {
-    return categoryConfig[name] || { ...categoryConfig["default"], ar: name };
+    // Check for exact match or try lowercase
+    return categoryConfig[name] || categoryConfig[Object.keys(categoryConfig).find(k => k.toLowerCase() === name.toLowerCase()) || "default"];
 }
+

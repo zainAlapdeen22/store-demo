@@ -40,7 +40,7 @@ export function BuyButton({ product, isAuthenticated }: { product: any, isAuthen
         <div className="flex flex-col gap-2">
             <Button
                 size="lg"
-                className="w-full md:w-auto rounded-full px-8 text-lg"
+                className="w-full md:w-auto rounded-full px-8 text-lg transition-all active:scale-95 duration-100"
                 onClick={handleBuy}
                 disabled={added}
             >
@@ -49,4 +49,5 @@ export function BuyButton({ product, isAuthenticated }: { product: any, isAuthen
             </Button>
         </div>
     );
+
 }

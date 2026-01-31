@@ -9,11 +9,18 @@ export const authConfig = {
             const isLoggedIn = !!auth?.user;
             const userRole = auth?.user?.role;
             const isOnAdmin = nextUrl.pathname.startsWith("/admin");
+            const isOnLogin = nextUrl.pathname === "/login";
+
+            if (isOnLogin) {
+                if (isLoggedIn) return Response.redirect(new URL("/", nextUrl));
+                return true;
+            }
 
             // Allow public routes
             if (!isOnAdmin) {
                 return true;
             }
+
 
             // Admin routes require authentication and SUPER_ADMIN role
             if (isOnAdmin) {

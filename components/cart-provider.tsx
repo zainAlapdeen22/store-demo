@@ -15,6 +15,9 @@ interface CartContextType {
     items: CartItem[];
     addItem: (item: CartItem) => void;
     removeItem: (productId: string, variant?: string) => void;
+    updateQuantity: (productId: string, quantity: number, variant?: string) => void;
+    incrementQuantity: (productId: string, variant?: string) => void;
+    decrementQuantity: (productId: string, variant?: string) => void;
     clearCart: () => void;
     total: number;
 }
@@ -63,12 +66,43 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         );
     };
 
+    const updateQuantity = (productId: string, quantity: number, variant?: string) => {
+        if (quantity < 1) return; // Minimum quantity is 1
+        setItems((current) =>
+            current.map((i) =>
+                i.productId === productId && i.variant === variant
+                    ? { ...i, quantity }
+                    : i
+            )
+        );
+    };
+
+    const incrementQuantity = (productId: string, variant?: string) => {
+        setItems((current) =>
+            current.map((i) =>
+                i.productId === productId && i.variant === variant
+                    ? { ...i, quantity: i.quantity + 1 }
+                    : i
+            )
+        );
+    };
+
+    const decrementQuantity = (productId: string, variant?: string) => {
+        setItems((current) =>
+            current.map((i) =>
+                i.productId === productId && i.variant === variant
+                    ? { ...i, quantity: Math.max(1, i.quantity - 1) } // Minimum 1
+                    : i
+            )
+        );
+    };
+
     const clearCart = () => setItems([]);
 
     const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
     return (
-        <CartContext.Provider value={{ items, addItem, removeItem, clearCart, total }}>
+        <CartContext.Provider value={{ items, addItem, removeItem, updateQuantity, incrementQuantity, decrementQuantity, clearCart, total }}>
             {children}
         </CartContext.Provider>
     );

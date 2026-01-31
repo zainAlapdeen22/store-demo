@@ -194,7 +194,6 @@ export async function updateOrderStatus(formData: FormData) {
     const role = session?.user?.role;
 
     // Basic RBAC for status updates
-    // In a real app, we'd check specific permissions more granularly
     if (!role || role === "USER") {
         throw new Error("Unauthorized");
     }
@@ -202,18 +201,25 @@ export async function updateOrderStatus(formData: FormData) {
     const orderId = formData.get("orderId") as string;
     const newStatus = formData.get("status") as string;
 
-    // TODO: Add specific role checks per status transition if needed
-    // e.g. Only AUDITOR can set PAYMENT_VERIFIED
+    if (!orderId || !newStatus) return;
 
-    await prisma.order.update({
-        where: { id: orderId },
-        data: { status: newStatus },
-    });
+    try {
+        await prisma.order.update({
+            where: { id: orderId },
+            data: { status: newStatus },
+        });
 
-    revalidatePath("/admin/orders");
-    revalidatePath(`/admin/orders/${orderId}`);
-    revalidatePath("/orders");
+        // Revalidate all related paths
+        revalidatePath("/admin/orders");
+        revalidatePath(`/admin/orders/${orderId}`);
+        revalidatePath("/orders");
+        revalidatePath("/", "layout"); // Global revalidate as a safety measure for status changes
+    } catch (error) {
+        console.error("Failed to update order status:", error);
+        throw new Error("Action failed");
+    }
 }
+
 
 export async function createAdminUser(formData: FormData) {
     const session = await auth();
@@ -243,3 +249,37 @@ export async function createAdminUser(formData: FormData) {
         throw new Error("Failed to create user. Email might be taken.");
     }
 }
+
+export async function getDashboardStats() {
+    const session = await auth();
+    if (session?.user?.role !== "SUPER_ADMIN" && session?.user?.role !== "AUDITOR") {
+        throw new Error("Unauthorized");
+    }
+
+    const productCount = await prisma.product.count();
+    const orderCount = await prisma.order.count();
+    const userCount = await prisma.user.count();
+    const totalRevenue = await prisma.order.aggregate({
+        _sum: {
+            total: true,
+        },
+    });
+
+    const lowStockProducts = await prisma.product.findMany({
+        where: {
+            stock: {
+                lte: 5
+            }
+        },
+        take: 5
+    });
+
+    return {
+        productCount,
+        orderCount,
+        userCount,
+        totalRevenue: totalRevenue._sum.total || 0,
+        lowStockProducts
+    };
+}
+
