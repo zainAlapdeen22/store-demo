@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { updateUserRole, createAdminUser } from "@/app/actions";
+import { EditUserDialog } from "@/components/admin/edit-user-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -98,17 +99,14 @@ export default async function SuperAdminPage() {
                                         </span>
                                     </TableCell>
                                     <TableCell>
-                                        <form action={updateUserRole} className="flex items-center gap-2">
-                                            <input type="hidden" name="userId" value={user.id} />
-                                            <select name="role" className="h-8 rounded-md border border-input bg-background px-2 text-xs" defaultValue={user.role}>
-                                                <option value="USER">User</option>
-                                                <option value="SUPER_ADMIN">Super Admin</option>
-                                                <option value="AUDITOR">Auditor</option>
-                                                <option value="SUPPLIER">Supplier</option>
-                                                <option value="EDITOR">Editor</option>
-                                            </select>
-                                            <Button size="sm" variant="ghost" className="h-8">Update</Button>
-                                        </form>
+                                        <div className="flex items-center gap-2">
+                                            <EditUserDialog user={{
+                                                id: user.id,
+                                                name: user.name,
+                                                email: user.email,
+                                                role: user.role
+                                            }} />
+                                        </div>
                                     </TableCell>
                                 </TableRow>
                             ))}

@@ -220,6 +220,36 @@ export async function updateOrderStatus(formData: FormData) {
     }
 }
 
+export async function updateUser(formData: FormData) {
+    const session = await auth();
+    if (session?.user?.role !== "SUPER_ADMIN") {
+        throw new Error("Unauthorized");
+    }
+
+    const userId = formData.get("userId") as string;
+    const name = formData.get("name") as string;
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+    const role = formData.get("role") as string;
+
+    const updateData: any = { name, email, role };
+
+    if (password && password.trim() !== "") {
+        updateData.password = await bcrypt.hash(password, 10);
+    }
+
+    try {
+        await prisma.user.update({
+            where: { id: userId },
+            data: updateData,
+        });
+        revalidatePath("/admin/super");
+    } catch (error) {
+        console.error("Failed to update user:", error);
+        throw new Error("Failed to update user. Email might be taken.");
+    }
+}
+
 
 export async function createAdminUser(formData: FormData) {
     const session = await auth();

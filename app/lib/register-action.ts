@@ -50,10 +50,31 @@ export async function register(prevState: any, formData: FormData) {
         };
     }
 
-    // Auto-login after successful registration
-    await signIn("credentials", {
-        email,
-        password,
-        redirectTo: "/",
-    });
+    // Send verification code
+    let userForRedirect = null;
+    try {
+        const user = await prisma.user.findUnique({ where: { email } });
+        if (user) {
+            const { randomInt } = await import('crypto');
+            const token = randomInt(100000, 999999).toString();
+            const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
+            await prisma.verificationToken.create({
+                data: { userId: user.id, token, expiresAt }
+            });
+
+            const { sendEmailVerificationCode } = await import('@/lib/email');
+            await sendEmailVerificationCode(email, token);
+
+            userForRedirect = user.id;
+        }
+    } catch (e) {
+        console.error("Error in registration post-processing:", e);
+    }
+
+    if (userForRedirect) {
+        return redirect(`/auth/verify-2fa?userId=${userForRedirect}&type=email`);
+    }
+
+    redirect("/login");
 }

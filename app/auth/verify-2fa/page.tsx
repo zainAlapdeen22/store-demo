@@ -11,6 +11,9 @@ export default function Verify2FAPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const userId = searchParams.get("userId");
+    const type = searchParams.get("type"); // 'email' or null (default 2fa)
+
+    const isEmailVerify = type === 'email';
 
     const [token, setToken] = useState("");
     const [loading, setLoading] = useState(false);
@@ -38,7 +41,8 @@ export default function Verify2FAPage() {
         setLoading(true);
 
         try {
-            const response = await fetch("/api/auth/2fa/verify", {
+            const endpoint = isEmailVerify ? "/api/auth/verify-email" : "/api/auth/2fa/verify";
+            const response = await fetch(endpoint, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ userId, token }),
@@ -50,10 +54,23 @@ export default function Verify2FAPage() {
                 throw new Error(data.error || "فشل التحقق - Verification failed");
             }
 
+            // Sign in using the token as the "password"
+            const { signIn } = await import("next-auth/react");
+            const result = await signIn("credentials", {
+                email: data.user.email,
+                password: token,
+                redirect: false,
+            });
+
+            if (result?.error) {
+                throw new Error("حدث خطأ أثناء تسجيل الدخول. يرجى المحاولة بشكل يدوي.");
+            }
+
             setSuccess(true);
             setTimeout(() => {
                 router.push("/");
-            }, 1500);
+                router.refresh();
+            }, 1000);
 
         } catch (err: any) {
             setError(err.message);
@@ -67,7 +84,8 @@ export default function Verify2FAPage() {
         setError("");
 
         try {
-            const response = await fetch("/api/auth/2fa/generate", {
+            const endpoint = isEmailVerify ? "/api/auth/send-verification" : "/api/auth/2fa/generate";
+            const response = await fetch(endpoint, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ userId }),
@@ -101,10 +119,10 @@ export default function Verify2FAPage() {
                         <Shield className="w-8 h-8 text-white" />
                     </div>
                     <CardTitle className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                        التحقق الثنائي
+                        {isEmailVerify ? "تأكيد البريد الإلكتروني" : "التحقق الثنائي"}
                     </CardTitle>
                     <CardDescription className="text-base">
-                        Two-Factor Authentication
+                        {isEmailVerify ? "Email Verification" : "Two-Factor Authentication"}
                     </CardDescription>
                 </CardHeader>
 
@@ -182,7 +200,7 @@ export default function Verify2FAPage() {
                             <div className="pt-4 border-t space-y-3">
                                 <div className="flex items-center justify-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                                     <Clock className="w-4 h-4" />
-                                    <span>الرمز صالح لمدة 10 دقائق / Code valid for 10 minutes</span>
+                                    <span>{isEmailVerify ? "الرمز صالح لمدة 15 دقيقة" : "الرمز صالح لمدة 10 دقائق"}</span>
                                 </div>
 
                                 <div className="text-center">

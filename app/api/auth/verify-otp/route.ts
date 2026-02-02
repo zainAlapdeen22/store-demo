@@ -74,8 +74,11 @@ export async function POST(request: NextRequest) {
                 email: true,
                 name: true,
                 twoFactorEnabled: true,
+                emailVerified: true,
             },
         });
+
+        let isNewUser = false;
 
         if (!user) {
             // Create new user with a random password (they'll use OTP to login)
@@ -86,15 +89,56 @@ export async function POST(request: NextRequest) {
                 data: {
                     email: email.toLowerCase(),
                     password: hashedPassword,
-                    name: email.split('@')[0]
+                    name: email.split('@')[0],
+                    emailVerified: false, // New users need to verify email
                 },
                 select: {
                     id: true,
                     email: true,
                     name: true,
                     twoFactorEnabled: true,
+                    emailVerified: true,
                 },
             });
+            isNewUser = true;
+        }
+
+        // Check if email is verified
+        if (!user.emailVerified) {
+            // Send verification email
+            const { sendVerificationEmail } = await import('@/lib/email');
+
+            // Delete any existing verification tokens
+            await prisma.verificationToken.deleteMany({
+                where: { userId: user.id }
+            });
+
+            // Generate 6-digit numeric token
+            const { randomInt } = await import('crypto');
+            const token = randomInt(100000, 999999).toString();
+            const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+
+            // Create verification token
+            await prisma.verificationToken.create({
+                data: {
+                    userId: user.id,
+                    token,
+                    expiresAt
+                }
+            });
+
+            // Send verification email code
+            const { sendEmailVerificationCode } = await import('@/lib/email');
+            await sendEmailVerificationCode(user.email, token);
+
+            return NextResponse.json({
+                requiresVerification: true,
+                userId: user.id,
+                email: user.email,
+                message: isNewUser
+                    ? 'Account created! Please verify your email to continue.'
+                    : 'Please verify your email to continue.'
+            }, { status: 200 });
         }
 
         // Check if 2FA is enabled

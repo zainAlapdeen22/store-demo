@@ -74,11 +74,17 @@ export default function LoginPage() {
             const data = await response.json();
 
             if (response.ok) {
-                // Check if 2FA is required
-                if (data.requires2FA) {
+                // Check if 2FA is required OR email verification is required
+                if (data.requires2FA || data.requiresVerification) {
                     showAlert({ title: 'نجح / Success', message: data.message, type: 'success' });
-                    // Redirect to 2FA verification page
-                    router.push(`/auth/verify-2fa?userId=${data.userId}`);
+
+                    const params = new URLSearchParams();
+                    params.set('userId', data.userId);
+                    if (data.requiresVerification) {
+                        params.set('type', 'email');
+                    }
+
+                    router.push(`/auth/verify-2fa?${params.toString()}`);
                 } else {
                     showAlert({ title: 'نجح / Success', message: 'Login successful!', type: 'success' });
                     // Create a session using NextAuth
