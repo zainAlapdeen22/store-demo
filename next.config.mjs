@@ -32,6 +32,14 @@ const nextConfig = {
                 ]
             }
         ];
+    },
+    images: {
+        remotePatterns: [
+            {
+                protocol: 'https',
+                hostname: 'cfwqbocpbzxyynroclzp.supabase.co',
+            },
+        ],
     }
 };
 
