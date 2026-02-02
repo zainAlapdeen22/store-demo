@@ -170,7 +170,7 @@ export function TwoFactorSettings({ userId, initialEnabled, userEmail }: TwoFact
                         <p className="font-semibold">كيف يعمل التحقق الثنائي؟ / How does 2FA work?</p>
                         <ul className="list-disc list-inside space-y-1 text-xs">
                             <li>عند تسجيل الدخول، سيُطلب منك إدخال رمز التحقق</li>
-                            <li>When logging in, you'll be asked to enter a verification code</li>
+                            <li>When logging in, you&apos;ll be asked to enter a verification code</li>
                             <li>سيتم إرسال الرمز إلى بريدك الإلكتروني</li>
                             <li>The code will be sent to your email</li>
                             <li>الرمز صالح لمدة 10 دقائق فقط</li>

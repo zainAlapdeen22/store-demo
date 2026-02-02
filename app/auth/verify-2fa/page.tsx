@@ -151,7 +151,7 @@ function Verify2FAContent() {
                                 لقد أرسلنا رمز التحقق المكون من 6 أرقام إلى بريدك الإلكتروني
                             </p>
                             <p className="text-xs text-blue-500 dark:text-blue-400">
-                                We've sent a 6-digit verification code to your email
+                                We&apos;ve sent a 6-digit verification code to your email
                             </p>
                         </div>
 

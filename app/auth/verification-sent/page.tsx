@@ -79,7 +79,7 @@ function VerificationSentContent() {
                     </p>
 
                     <p className="text-sm text-gray-500">
-                        We've sent a verification email to your inbox.
+                        We&apos;ve sent a verification email to your inbox.
                         <br />
                         Please check your email and click the verification link.
                     </p>
@@ -90,7 +90,7 @@ function VerificationSentContent() {
                             <br />
                             تحقق من مجلد الرسائل غير المرغوب فيها (Spam)
                             <br />
-                            Check your spam folder if you don't see the email
+                            Check your spam folder if you don&apos;t see the email
                         </p>
                     </div>
                 </div>
